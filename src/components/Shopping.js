@@ -123,8 +123,6 @@ class Shopping extends Component {
         this.setState({ refresh: true })
         await this.props.toggleItem(itemId);
         store = createStore(reducer)
-        console.log('toggle')
-        console.log(store.getState().cartFunctions)
         this.setState({ itemList: store.getState().cartFunctions, refresh: false, name: '' })
     }
 
@@ -132,7 +130,6 @@ class Shopping extends Component {
         this.setState({ refresh: true })
         await this.props.filterItem(filter);
         store = createStore(reducer)
-        console.log(store.getState().cartFunctions)
         this.setState({ itemList: store.getState().cartFunctions, refresh: false, name: '' })
     }
     renderItem({ item }) {
