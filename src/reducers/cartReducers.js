@@ -18,7 +18,7 @@ const cartAction = (state = initialState, action) => {
 
     case 'REDO_ITEM':
       if (undoState.length === 0) {
-        console.log("RREEEs")
+
         redoState = [];
         return;
       }
@@ -31,7 +31,6 @@ const cartAction = (state = initialState, action) => {
       return redoState;
 
     case 'TOGGLE_ITEM':
-      console.log(initialState[action.id])
       initialState[action.id].completed = !initialState[action.id].completed
       return initialState
 
