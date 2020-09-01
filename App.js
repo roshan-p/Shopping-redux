@@ -19,7 +19,7 @@ import {
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import Shopping from './src/components/Shopping'
-import reducer from './src/components/reducer'
+import reducer from './src/reducers'
 
 store = createStore(reducer)
 class App extends Component {
