@@ -1,9 +1,10 @@
 import { combineReducers } from 'redux'
-import cartFunctions from './cartReducers'
-
+import cartReducer from './cart'
+import filterReducer from './filter'
 
 const reducer = combineReducers({
-     cartFunctions,
+     cartRc:cartReducer,
+     filterRc:filterReducer
 })
 
 export default reducer

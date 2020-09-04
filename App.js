@@ -21,7 +21,10 @@ import { Provider } from 'react-redux';
 import Shopping from './src/components/Shopping'
 import reducer from './src/reducers'
 
-store = createStore(reducer)
+store = createStore(reducer);
+store.subscribe(()=>{
+  console.log('[subscribe]',store.getState());
+})
 class App extends Component {
   componentWillMount() {
   

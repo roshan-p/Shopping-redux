@@ -3,9 +3,8 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, SafeAreaView, Flat
 import Header from './Header'
 import { addItem, unDoItem, reDoItem, toggleItem, filterItem } from '../actions'
 import PropTypes from 'prop-types';
-import { bindActionCreators, createStore } from 'redux';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import reducer from '../reducers'
 const styles = StyleSheet.create({
 
     container: {
@@ -14,7 +13,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     safeAreaContainer: {
-        // top:100,
         margin: 10,
         height: '50%',
     },
@@ -85,52 +83,64 @@ class Shopping extends Component {
             itemList: [],
             refresh: false,
             undoList: [],
+            filtering: false,
+            currentFilter: 'SHOWALL',
+
         }
-        this.addFunction = this.addFunction.bind(this);
+
         this.renderItem = this.renderItem.bind(this);
+        this.addFunction = this.addFunction.bind(this);
         this.undoFunction = this.undoFunction.bind(this);
         this.redoFunction = this.redoFunction.bind(this);
         this.toggleIFunction = this.toggleIFunction.bind(this);
         this.filterFunction = this.filterFunction.bind(this);
     }
+
     async addFunction() {
         this.setState({ refresh: true })
         await this.props.addItem(this.state.name)
-        store = createStore(reducer)
-        this.setState({ itemList: store.getState().cartFunctions, refresh: false, name: '' })
+        if (this.state.currentFilter !== 'SHOWALL') {
+            this.filterFunction(this.state.currentFilter);
+        }
+        this.setState({ refresh: false, name: '' })
     }
     async undoFunction() {
         this.setState({ refresh: true })
         await this.props.unDoItem()
-        await this.props.addItem(this.state.name)
-        store = createStore(reducer)
-        let itemList = this.state.itemList;
-        itemList.pop();
-
-        this.setState({ itemList: itemList, refresh: false, name: '', undoList: store.getState().cartFunctions })
+        if (this.state.currentFilter !== 'SHOWALL') {
+            this.filterFunction(this.state.currentFilter);
+        }
+        this.setState({ refresh: false })
     }
 
     async redoFunction() {
-        if (this.state.undoList.length === 0) return;
         this.setState({ refresh: true })
         await this.props.reDoItem()
-        store = createStore(reducer)
-        let undoList = this.state.undoList;
-        undoList.pop();
-        this.setState({ itemList: store.getState().cartFunctions, refresh: false, name: '', undoList })
+        if (this.state.currentFilter !== 'SHOWALL') {
+            this.filterFunction(this.state.currentFilter);
+        }
+        this.setState({ refresh: false })
     }
     async toggleIFunction(itemId) {
         this.setState({ refresh: true })
         await this.props.toggleItem(itemId);
-        store = createStore(reducer)
-        this.setState({ itemList: store.getState().cartFunctions, refresh: false, name: '' })
+        if (this.state.currentFilter !== 'SHOWALL') {
+            this.filterFunction(this.state.currentFilter);
+        }
+        this.setState({ refresh: false })
     }
 
     async filterFunction(filter) {
-        this.setState({ refresh: true })
-        await this.props.filterItem(filter);
-        store = createStore(reducer)
-        this.setState({ itemList: store.getState().cartFunctions, refresh: false, name: '' })
+        this.setState({ refresh: true, currentFilter: filter })
+        await this.props.filterItem(filter, this.props.currentList);
+        if (filter === 'SHOWALL') {
+            this.setState({ filtering: false });
+        } else {
+            this.setState({ filtering: true });
+        }
+        this.setState({ refresh: false })
+
+
     }
     renderItem({ item }) {
         if (item.length === 0) {
@@ -153,12 +163,12 @@ class Shopping extends Component {
                             value={this.state.name}
                             style={styles.shoppingInput}
                         />
-                        <TouchableOpacity onPress={() => { this.addFunction() }} style={styles.shoppingButton}><Text style={styles.shoppingText}>Add Shopping List</Text></TouchableOpacity>
+                        <TouchableOpacity onPress={() => { this.addFunction(this.state.name) }} style={styles.shoppingButton}><Text style={styles.shoppingText}>Add Shopping List</Text></TouchableOpacity>
                     </View>
                 </View>
                 <SafeAreaView style={styles.safeAreaContainer}>
                     <FlatList
-                        data={this.state.itemList}
+                        data={!this.state.filtering ? this.props.currentList : this.props.filterStateObj.filterState}
                         renderItem={this.renderItem}
                         keyExtractor={item => item.id.toString()}
                         refreshing={this.state.refresh}
@@ -195,9 +205,14 @@ const mapDispatchToProps = dispatch => (
     }, dispatch)
 );
 
-const mapStateToProps = state => ({
+const mapStateToProps = state => {
+    return {
+        currentList: state.cartRc.currentState,
+        filterList: state.filterRc.filterState,
+        filterStateObj: state.filterRc,
+    }
 
-});
+};
 
 Shopping.propTypes = {
     addItem: PropTypes.func.isRequired,
@@ -208,7 +223,8 @@ Shopping.propTypes = {
 };
 
 Shopping.defaultProps = {
-
+    currentList: [],
+    filterList: [],
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Shopping);
