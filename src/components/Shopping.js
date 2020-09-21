@@ -80,12 +80,9 @@ class Shopping extends Component {
         super(props);
         this.state = {
             name: '',
-            itemList: [],
             refresh: false,
-            undoList: [],
             filtering: false,
             currentFilter: 'SHOWALL',
-
         }
 
         this.renderItem = this.renderItem.bind(this);
